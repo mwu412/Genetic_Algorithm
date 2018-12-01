@@ -2,16 +2,16 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-# NO MUTATION FOR NOW
-
 class chromosome:
-    def __init__(self, decimal, num_bit):
-        self.decimal = decimal
-        self.bin = ("{0:0"+str(num_bit)+"b}").format(decimal) 
+    def __init__(self, binary, num_bit):
+        self.xbin = binary[0:int(num_bit/2)]
+        self.ybin = binary[int(num_bit/2):num_bit]
+        self.xdecimal = (self.xbin.fromBinaryToInt() * 0.0235294) - 3
+        self.ydecimal = (self.ybin.fromBinaryToInt() * 0.0235294) - 3
         # ----- WARN: The fitness function should be carefully costimized ----- #
         # Keep in mind: fitness scores should be positive for roulette wheel 
         # in the case use int() to round off negative numbers to 0
-        self.fit = np.ceil(np.exp((16*decimal-4*(decimal**2))*0.3))  
+        self.fit = np.ceil(np.exp((16*self.decimal-4*(self.decimal**2))*0.3))  
         # --------------------------------------------------------------------- #
 
 class population:
@@ -22,10 +22,13 @@ class population:
         self.pop_history = []
 
         first_population = []
+        
+        for i in range(self.generation):
+            new_bin = ''  # without duplicates avoidance
+            for j in range(self.genes_num):
+                new_bin += str(random.randint(0,1))
+            first_population.append(chromosome(new_bin, self.genes_num))
 
-        choosen_decimal_list = random.sample(range(2**genes_num), pop_size)  # sample without duplicates
-        for decimal in choosen_decimal_list:
-            first_population.append(chromosome(decimal, genes_num))
         self.pop_history.append(first_population)
 
     def pick_parent(self, prev_gen):
@@ -77,7 +80,7 @@ class population:
         plt.show()
 
 def main():
-    ga = population(6, 4, 10)
+    ga = population(6, 16, 10)
     ga.evolve()
 
 if __name__ == '__main__':
