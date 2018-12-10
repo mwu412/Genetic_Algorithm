@@ -31,7 +31,7 @@ class population:
     def pick_parent(self, prev_gen):
         # roulette wheel choose parents
         total = sum([c.fit for c in prev_gen])  # python list is so mighty!!!
-        pick = random.randint(0, total)
+        pick = random.randint(0, total-1)
         count = 0
         for chromo in prev_gen:
             count += chromo.fit
@@ -75,10 +75,22 @@ class population:
         axes.set_ylim([0,int(2**self.genes_num-1)])
         
         plt.show()
+        plt.close()
+
+    def plot_history(self):
+        fig = plt.figure()
+        fig.subplots_adjust(hspace=0.4, wspace=0.4)
+        for i in range(1, self.generation+1):
+            ax = fig.add_subplot(4, 3, i)  # a*b should >= self.generation
+            ax.text(0.5, 0.5, str(i)+'th generation', fontsize=12, ha='center')
+            ax.hist([c.decimal for c in self.pop_history[i-1]], list(range(1,16)))
+
+        fig.show()
 
 def main():
     ga = population(6, 4, 10)
     ga.evolve()
+    ga.plot_history()
 
 if __name__ == '__main__':
     main()
