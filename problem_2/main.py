@@ -4,9 +4,9 @@ import random
 
 class chromosome:
     def __init__(self, binary, num_bit):
-        self.xbin = binary[0:int(num_bit/2)]
+        self.xbin = binary[0:int(num_bit/2)]  # number of bit must be even number
         self.ybin = binary[int(num_bit/2):num_bit]
-        self.bin = self.xbin + self.ybin
+        self.bin = binary
         self.x = int(self.xbin, 2) * 0.0235294 - 3
         self.y = int(self.ybin, 2) * 0.0235294 - 3
         # ----- WARN: The fitness function should be carefully costimized ----- #
@@ -29,7 +29,7 @@ class population:
         for i in range(self.pop_size):
             binary_str = ''
             for j in range(self.genes_num):
-                binary_str+=str(random.randint(0,1))
+                binary_str += str(random.randint(0,1))
             choosen_bin_list.append(binary_str)  # did not avoid duplicate
 
         for binary in choosen_bin_list:
@@ -45,16 +45,24 @@ class population:
             count += chromo.fit
             if count > pick:
                 return chromo
+
+    def mutation(self, binary):
+        if random.random() < 0.01:
+            here = random.randint(0, self.genes_num-1)
+            list_binary = list(binary)
+            list_binary[here] = str(1 - int(list_binary[here]))
+            return "".join(list_binary)
+        return binary
             
     def cross_decimal(self):
         dad = self.pick_parent(self.pop_history[-1])
         mom = self.pick_parent(self.pop_history[-1])
         if random.random() < 0.7:
             # 1-point crossover
-            here = random.randint(1,self.genes_num-2)  # N=random.randint(a, b): a <= N <= b.
+            here = random.randint(1,self.genes_num-1)  # N=random.randint(a, b): a <= N <= b.
             # didn't prevent dad == mom
-            brother_bin = mom.bin[0:here] + dad.bin[here:self.genes_num]
-            sister_bin = dad.bin[0:here] + mom.bin[here:self.genes_num]
+            brother_bin = self.mutation(mom.bin[0:here] + dad.bin[here:self.genes_num])
+            sister_bin = self.mutation(dad.bin[0:here] + mom.bin[here:self.genes_num])
             return [brother_bin, sister_bin]
         return [dad.bin, mom.bin]
 
@@ -67,28 +75,46 @@ class population:
         self.pop_history.append(this_generation)
 
     def evolve(self):
-        plt.title('GA')
-        plt.xlabel('th generation')
-        plt.ylabel('avg. output')
         for i in range(self.generation-1):
             self.create_new_gen()
         count = 1
+        
+        f, (ax1, ax2) = plt.subplots(1, 2, sharey=True)
+        ax1.set_title('x')
+        ax1.set_xlabel('th gen.')
+        ax1.set_ylabel('avg. value of x')
+        ax2.set_title('y')
+        ax2.set_xlabel('th gen.')
+        ax2.set_ylabel('avg. value pf y')
+
         for pop in self.pop_history:
             avg_decimal_x = sum([c.x for c in pop])/self.pop_size
             avg_decimal_y = sum([c.y for c in pop])/self.pop_size
-            plt.scatter(count, avg_decimal_x)
-            plt.scatter(count, avg_decimal_y)
+
+            ax1.scatter(count, avg_decimal_x)
+            ax2.scatter(count, avg_decimal_y)
 
             count += 1
         
-        axes = plt.gca()
-        axes.set_xlim([1,self.generation])
-        axes.set_ylim([0,int(2**self.genes_num-1)])
+        #axes = plt.gca()
+        #axes.set_xlim([1,self.generation])
+        #axes.set_ylim([0,int(2**self.genes_num-1)])
         
         plt.show()
 
+    def plot_history(self):
+        fig = plt.figure()
+        fig.subplots_adjust(hspace=1, wspace=0.4)
+        for i in range(1, self.generation+1):
+            ax = fig.add_subplot(4, 3, i)  # a*b should >= self.generation
+            ax.set_xticks(range(1,16))
+            ax.set_title(str(i)+'th gen.')
+            ax.hist([c.decimal for c in self.pop_history[i-1]], list(range(1,16)))
+
+        plt.show()
+
 def main():
-    ga = population(6, 16, 10)
+    ga = population(20, 16, 100)
     ga.evolve()
 
 if __name__ == '__main__':

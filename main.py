@@ -37,6 +37,14 @@ class population:
             count += chromo.fit
             if count > pick:
                 return chromo
+    
+    def mutation(self, binary):
+        if random.random() < 0.001:
+            here = random.randint(0, self.genes_num)
+            list_binary = list(binary)
+            list_binary[here] = str(1 - int(list_binary[here]))
+            return "".join(list_binary)
+        return binary
             
     def cross_decimal(self):
         dad = self.pick_parent(self.pop_history[-1])
@@ -45,8 +53,8 @@ class population:
             # 1-point crossover
             here = random.randint(1,self.genes_num-2)  # N=random.randint(a, b): a <= N <= b.
             # didn't prevent dad == mom
-            brother_decimal = int(mom.bin[0:here] + dad.bin[here:self.genes_num], 2)
-            sister_decimal = int(dad.bin[0:here] + mom.bin[here:self.genes_num], 2)
+            brother_decimal = int(self.mutation(mom.bin[0:here] + dad.bin[here:self.genes_num]), 2)
+            sister_decimal = int(self.mutation(dad.bin[0:here] + mom.bin[here:self.genes_num]), 2)
             return [brother_decimal, sister_decimal]
         return [dad.decimal, mom.decimal]
 
@@ -79,13 +87,14 @@ class population:
 
     def plot_history(self):
         fig = plt.figure()
-        fig.subplots_adjust(hspace=0.4, wspace=0.4)
+        fig.subplots_adjust(hspace=1, wspace=0.4)
         for i in range(1, self.generation+1):
             ax = fig.add_subplot(4, 3, i)  # a*b should >= self.generation
-            ax.text(0.5, 0.5, str(i)+'th generation', fontsize=12, ha='center')
+            ax.set_xticks(range(1,16))
+            ax.set_title(str(i)+'th gen.')
             ax.hist([c.decimal for c in self.pop_history[i-1]], list(range(1,16)))
 
-        fig.show()
+        plt.show()
 
 def main():
     ga = population(6, 4, 10)
