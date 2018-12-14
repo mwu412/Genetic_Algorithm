@@ -12,7 +12,7 @@ class chromosome:
         # ----- WARN: The fitness function should be carefully costimized ----- #
         # Keep in mind: fitness scores should be positive for roulette wheel 
         # in the case use int() to round off negative numbers to 0
-        self.fit = np.ceil(np.exp((1-self.x)**2*np.exp(-self.x**2-(self.y+1)**2)
+        self.fit = (np.exp((1-self.x)**2*np.exp(-self.x**2-(self.y+1)**2)
                 -(self.x-self.x**3-self.y**3)*np.exp(-self.x**2-self.y**2)))  
         # --------------------------------------------------------------------- #
 
@@ -39,7 +39,7 @@ class population:
     def pick_parent(self, prev_gen):
         # roulette wheel choose parents
         total = sum([c.fit for c in prev_gen])  # python list is so mighty!!!
-        pick = random.randint(0, total-1)
+        pick = random.uniform(0, total-0.01)
         count = 0
         for chromo in prev_gen:
             count += chromo.fit
@@ -47,7 +47,7 @@ class population:
                 return chromo
 
     def mutation(self, binary):
-        if random.random() < 0.01:
+        if random.random() < 0.05:
             here = random.randint(0, self.genes_num-1)
             list_binary = list(binary)
             list_binary[here] = str(1 - int(list_binary[here]))
@@ -104,18 +104,31 @@ class population:
 
     def plot_history(self):
         fig = plt.figure()
-        fig.subplots_adjust(hspace=1, wspace=0.4)
+        fig.subplots_adjust(hspace=1, wspace=0.8)
         for i in range(1, self.generation+1):
-            ax = fig.add_subplot(4, 3, i)  # a*b should >= self.generation
-            ax.set_xticks(range(1,16))
+            ax = fig.add_subplot(5, 20, i)  # a*b should >= self.generation
+            ax.set_xlim(-3, 3)
+            ax.set_xticks(np.arange(-3, 3, step=3))
             ax.set_title(str(i)+'th gen.')
-            ax.hist([c.decimal for c in self.pop_history[i-1]], list(range(1,16)))
+            ax.hist([c.x for c in self.pop_history[i-1]])
+
+        plt.show()
+
+        fig = plt.figure()
+        fig.subplots_adjust(hspace=1, wspace=0.8)
+        for i in range(1, self.generation+1):
+            ax = fig.add_subplot(5, 20, i)  # a*b should >= self.generation
+            ax.set_xlim(-3, 3)
+            ax.set_xticks(np.arange(-3, 3, step=3))
+            ax.set_title(str(i)+'th gen.')
+            ax.hist([c.y for c in self.pop_history[i-1]])
 
         plt.show()
 
 def main():
-    ga = population(20, 16, 100)
+    ga = population(6, 16, 100)
     ga.evolve()
+    ga.plot_history()
 
 if __name__ == '__main__':
     main()

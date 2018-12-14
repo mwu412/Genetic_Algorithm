@@ -2,8 +2,6 @@ import numpy as np
 import matplotlib.pyplot as plt
 import random
 
-# NO MUTATION FOR NOW
-
 class chromosome:
     def __init__(self, decimal, num_bit):
         self.decimal = decimal

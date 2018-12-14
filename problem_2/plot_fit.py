@@ -13,7 +13,7 @@ y = np.linspace(-3.0, 3.0, 100)
 
 X , Y = np.meshgrid(x, y)
 
-Z = func_exp(X, Y)
+Z = func(X, Y)
 
 ax = plt.axes(projection='3d')
 ax.plot_surface(X, Y, Z)  # Axes3D.plot_surface(X, Y, Z, *args, **kwargs)
